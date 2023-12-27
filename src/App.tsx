@@ -102,41 +102,6 @@ function App() {
     setProducts(updatedProducts);
   };
 
-  const openEditModal = (productId: number) => {
-    const productToEdit = products.find(product => product.id === productId);
-    setEditingProduct(productToEdit);
-    setIsEditModalOpen(true);
-  };
-
-  const closeEditModal = () => {
-    setEditingProduct(null);
-    setIsEditModalOpen(false);
-  };
-
-  const saveEdit = () => {
-    const productIndex: number = products.findIndex(product => product.id === editingProduct!.id);
-
-    const updatedProducts: Product[] = [...products];
-
-    updatedProducts[productIndex] = {
-      ...editingProduct!,
-      name: productName || editingProduct!.name,
-      brand: productBrand || editingProduct!.brand,
-      price: parseFloat(productPrice || '0') || editingProduct!.price,
-      link: productLink || editingProduct!.link,
-    };
-
-    setProducts(updatedProducts);
-    localStorage.setItem('products', JSON.stringify(updatedProducts));
-
-    closeEditModal();
-
-    setProductName('');
-    setProductBrand('');
-    setProductPrice('');
-    setProductLink('');
-  };
-
   return (
     <>
       <Center>
@@ -206,14 +171,14 @@ function App() {
       <div style={{
         display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'space-evenly',
+        justifyContent: 'space-around',
         alignItems: 'center',
         flexWrap: 'wrap',
         padding: '10px',
         margin: '10px',
       }}>
         {products.map((product) => (
-          <ChakraCard key={product.id} maxW={320}>
+          <ChakraCard key={product.id} maxW={300} m={2}>
             <CardBody>
               <Image
                 src={product.link}
@@ -222,6 +187,7 @@ function App() {
                 objectFit='cover'
                 objectPosition='center'
                 boxSize='100%'
+                h={180}
               />
               <Stack mt='6' spacing='3'>
                 <Heading size='md'>{product.name}</Heading>
@@ -249,62 +215,7 @@ function App() {
         ))}
       </div>
 
-      <Modal isOpen={isEditModalOpen} onClose={closeEditModal}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Edit Product</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <FormControl>
-              <FormLabel>Product Name</FormLabel>
-              <Input
-                type='text'
-                placeholder='Product Name'
-                value={productName || editingProduct?.name}
-                onChange={(e) => setProductName(e.target.value)}
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel>Product Brand</FormLabel>
-              <Input
-                type='text'
-                placeholder='Product Brand'
-                value={productBrand || editingProduct?.brand}
-                onChange={(e) => setProductBrand(e.target.value)}
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel>Product Link</FormLabel>
-              <Input
-                type='text'
-                placeholder='Enter Product Link'
-                value={productLink || editingProduct?.link}
-                onChange={(e) => setProductLink(e.target.value)}
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel>Product Price</FormLabel>
-              <NumberInput w={'100%'} value={productPrice || ''} onChange={(valueString) => setProductPrice(valueString)}>
-                <NumberInputField
-                  placeholder='Product Price'
-                />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
-            </FormControl>
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme='blue' onClick={saveEdit}>
-              Save
-            </Button>
-            <Button variant='ghost' onClick={closeEditModal}>
-              Cancel
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      
     </>
   );
 }
