@@ -1,4 +1,6 @@
+import React, { useState, useEffect } from 'react';
 import {
+  ChakraProvider,
   Center,
   Box,
   Card as ChakraCard,
@@ -31,26 +33,31 @@ import {
   FormLabel,
 } from '@chakra-ui/react';
 import { LinkIcon, EditIcon, StarIcon, DeleteIcon } from '@chakra-ui/icons';
-import { useState,useEffect } from 'react';
+
+interface Product {
+  id: number;
+  name: string;
+  brand: string;
+  price: number;
+  link: string;
+}
 
 function App() {
-  const [products, setProducts] = useState([]);
-  const [productName, setProductName] = useState('');
-  const [productBrand, setProductBrand] = useState('');
-  const [productPrice, setProductPrice] = useState('');
-  const [productLink, setProductLink] = useState('');
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productName, setProductName] = useState<string>('');
+  const [productBrand, setProductBrand] = useState<string>('');
+  const [productPrice, setProductPrice] = useState<string | null>(null);
+  const [productLink, setProductLink] = useState<string>('');
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const toast = useToast();
 
   useEffect(() => {
-    // Load existing products from local storage on component mount
     const storedProducts = JSON.parse(localStorage.getItem('products')) || [];
     setProducts(storedProducts);
   }, []);
 
   function addTocart() {
-    // Check if any field is empty before adding the product
     if (!productName || !productBrand || !productPrice || !productLink) {
       toast({
         title: 'Error',
@@ -62,19 +69,18 @@ function App() {
       return;
     }
 
-    const newProduct = {
+    const newProduct: Product = {
       id: Date.now(),
       name: productName,
       brand: productBrand,
-      price: parseFloat(productPrice),
+      price: parseFloat(productPrice || '0'),
       link: productLink,
     };
 
-    const updatedProducts = [...products, newProduct];
+    const updatedProducts: Product[] = [...products, newProduct];
 
     localStorage.setItem('products', JSON.stringify(updatedProducts));
 
-    // Clear input values
     setProductName('');
     setProductBrand('');
     setProductPrice('');
@@ -88,17 +94,16 @@ function App() {
       isClosable: true,
     });
 
-    // Update the state with the new product
     setProducts(updatedProducts);
   }
 
-  const deleteProduct = (productId) => {
-    const updatedProducts = products.filter(product => product.id !== productId);
+  const deleteProduct = (productId: number) => {
+    const updatedProducts: Product[] = products.filter(product => product.id !== productId);
     localStorage.setItem('products', JSON.stringify(updatedProducts));
     setProducts(updatedProducts);
   };
 
-  const openEditModal = (productId) => {
+  const openEditModal = (productId: number) => {
     const productToEdit = products.find(product => product.id === productId);
     setEditingProduct(productToEdit);
     setIsEditModalOpen(true);
@@ -110,36 +115,28 @@ function App() {
   };
 
   const saveEdit = () => {
-    // Find the index of the product to be edited
-    const productIndex = products.findIndex(product => product.id === editingProduct.id);
-  
-    // Create a copy of the products array to avoid directly mutating state
-    const updatedProducts = [...products];
-  
-    // Update the product in the copied array
+    const productIndex: number = products.findIndex(product => product.id === editingProduct!.id);
+
+    const updatedProducts: Product[] = [...products];
+
     updatedProducts[productIndex] = {
-      ...editingProduct,
-      name: productName || editingProduct.name,
-      brand: productBrand || editingProduct.brand,
-      price: parseFloat(productPrice) || editingProduct.price,
-      link: productLink || editingProduct.link,
+      ...editingProduct!,
+      name: productName || editingProduct!.name,
+      brand: productBrand || editingProduct!.brand,
+      price: parseFloat(productPrice || '0') || editingProduct!.price,
+      link: productLink || editingProduct!.link,
     };
-  
-    // Update the state and local storage
+
     setProducts(updatedProducts);
     localStorage.setItem('products', JSON.stringify(updatedProducts));
-  
-    // Close the modal and clear the edit state
+
     closeEditModal();
-  
-    // Clear input values after saving edits
+
     setProductName('');
     setProductBrand('');
     setProductPrice('');
     setProductLink('');
   };
-  
-  
 
   return (
     <>
@@ -187,7 +184,7 @@ function App() {
                 </InputGroup>
 
                 <InputGroup>
-                  <NumberInput w={'100%'} value={productPrice} onChange={(valueString) => setProductPrice(valueString)}>
+                  <NumberInput w={'100%'} value={productPrice || ''} onChange={(valueString) => setProductPrice(valueString)}>
                     <NumberInputField
                       placeholder='Product Price'
                     />
@@ -220,12 +217,12 @@ function App() {
           <ChakraCard key={product.id} maxW={320}>
             <CardBody>
               <Image
-                src={product.link} 
+                src={product.link}
                 alt={product.name}
                 borderRadius='lg'
-                objectFit='cover' 
-        objectPosition='center' 
-        boxSize='100%' 
+                objectFit='cover'
+                objectPosition='center'
+                boxSize='100%'
               />
               <Stack mt='6' spacing='3'>
                 <Heading size='md'>{product.name}</Heading>
@@ -253,7 +250,6 @@ function App() {
         ))}
       </div>
 
-      {/* Edit Modal */}
       <Modal isOpen={isEditModalOpen} onClose={closeEditModal}>
         <ModalOverlay />
         <ModalContent>
@@ -289,7 +285,7 @@ function App() {
             </FormControl>
             <FormControl>
               <FormLabel>Product Price</FormLabel>
-              <NumberInput w={'100%'} value={productPrice || editingProduct?.price} onChange={(valueString) => setProductPrice(valueString)}>
+              <NumberInput w={'100%'} value={productPrice || ''} onChange={(valueString) => setProductPrice(valueString)}>
                 <NumberInputField
                   placeholder='Product Price'
                 />
