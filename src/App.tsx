@@ -42,7 +42,7 @@ function App() {
   const toast = useToast();
 
   useEffect(() => {
-    const storedProducts = JSON.parse(localStorage.getItem('products')) || [];
+    const storedProducts: Product[] = JSON.parse(localStorage.getItem('products') || '[]');
     setProducts(storedProducts);
   }, []);
 
@@ -193,7 +193,7 @@ function App() {
                 <Button variant='solid' colorScheme='blue'>
                   Add To Cart
                 </Button>
-                <Button variant='ghost' colorScheme='gray' onClick={}>
+                <Button variant='ghost' colorScheme='gray'>
                   Edit
                 </Button>
                 <Button variant='ghost' colorScheme='red' onClick={() => deleteProduct(product.id)}>
