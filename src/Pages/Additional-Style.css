@@ -1,0 +1,7 @@
+.img-over:hover{
+    .img-prod{
+        
+            transform: scale(1.1);
+        
+    }
+}
