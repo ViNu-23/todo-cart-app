@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'; 
 import { Link } from 'react-router-dom';
 import {
   Box,
@@ -16,16 +16,23 @@ import {
 import { DeleteIcon } from '@chakra-ui/icons';
 import NavBar from './NavBar';
 
+interface CartItem {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+}
+
 export default function Cart() {
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   useEffect(() => {
     const storedCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
     setCartItems(storedCartItems);
   }, []);
 
-  const deleteCartItem = (itemId) => {
-    const updatedCartItems = cartItems.filter(item => item.id !== itemId);
+  const deleteCartItem = (itemId: string) => {
+    const updatedCartItems = cartItems.filter((item) => item.id !== itemId);
     localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
     setCartItems(updatedCartItems);
   };
@@ -48,7 +55,7 @@ export default function Cart() {
               </Tr>
             </Thead>
             <Tbody>
-              {cartItems.map((item) => (
+              {cartItems.map((item: CartItem) => (
                 <Tr key={item.id}>
                   <Td>{item.name}</Td>
                   <Td>{item.quantity}</Td>

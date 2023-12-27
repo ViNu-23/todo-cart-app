@@ -25,26 +25,34 @@ import {
   import NavBar from './NavBar';
   import { useState, useEffect } from 'react';
   
+  interface Product {
+    id: string;
+    name: string;
+    brand: string;
+    price: number;
+    link: string;
+  }
+  
   export default function Product() {
-    const [products, setProducts] = useState([]);
-    const [editingProduct, setEditingProduct] = useState(null);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [isEditModalOpen, setEditModalOpen] = useState(false);
-    const [quantityMap, setQuantityMap] = useState({}); // Map to store quantity for each product
+    const [quantityMap, setQuantityMap] = useState<{ [productId: string]: number }>({});
     const toast = useToast();
   
     useEffect(() => {
-      const storedProducts = JSON.parse(localStorage.getItem('products') || '[]');
+      const storedProducts: Product[] = JSON.parse(localStorage.getItem('products') || '[]');
       setProducts(storedProducts);
     }, []);
   
-    const deleteProduct = (productId) => {
+    const deleteProduct = (productId: string) => {
       const updatedProducts = products.filter((product) => product.id !== productId);
       localStorage.setItem('products', JSON.stringify(updatedProducts));
       setProducts(updatedProducts);
     };
   
-    const buyProduct = (productId) => {
-      const quantity = quantityMap[productId] || 1; // Get quantity from the map or default to 1
+    const buyProduct = (productId: string) => {
+      const quantity = quantityMap[productId] || 1;
   
       if (quantity <= 0) {
         toast({
@@ -58,18 +66,19 @@ import {
       }
   
       const productToBuy = products.find((product) => product.id === productId);
-      const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+      const cartItems: Product[] = JSON.parse(localStorage.getItem('cartItems') || '[]');
   
       const existingCartItem = cartItems.find((item) => item.id === productId);
   
       if (existingCartItem) {
         existingCartItem.quantity += quantity;
       } else {
-        const boughtItem = {
+        const boughtItem: Product = {
           id: productToBuy.id,
           name: productToBuy.name,
+          brand: productToBuy.brand,
           price: productToBuy.price,
-          quantity: quantity,
+          link: productToBuy.link,
         };
         cartItems.push(boughtItem);
       }
@@ -84,30 +93,31 @@ import {
         isClosable: true,
       });
   
-      // Reset the quantity for the current product to 1
       setQuantityMap((prevQuantityMap) => ({
         ...prevQuantityMap,
-        [productId]: '',
+        [productId]: 1, // Reset the quantity for the current product to 1
       }));
     };
   
-    const handleEditClick = (product) => {
+    const handleEditClick = (product: Product) => {
       setEditingProduct(product);
       setEditModalOpen(true);
     };
   
     const handleEditSubmit = () => {
-      const index = products.findIndex((product) => product.id === editingProduct.id);
+      if (editingProduct) {
+        const index = products.findIndex((product) => product.id === editingProduct.id);
   
-      if (index !== -1) {
-        const updatedProducts = [...products];
-        updatedProducts[index] = editingProduct;
+        if (index !== -1) {
+          const updatedProducts = [...products];
+          updatedProducts[index] = editingProduct;
   
-        localStorage.setItem('products', JSON.stringify(updatedProducts));
-        setProducts(updatedProducts);
+          localStorage.setItem('products', JSON.stringify(updatedProducts));
+          setProducts(updatedProducts);
   
-        setEditModalOpen(false);
-        setEditingProduct(null);
+          setEditModalOpen(false);
+          setEditingProduct(null);
+        }
       }
     };
   
@@ -128,7 +138,7 @@ import {
           {products.map((product) => (
             <ChakraCard
               key={product.id}
-              W={300}
+              w={300}
               m={2}
               boxShadow="rgba(149, 157, 165, 0.2) 0px 8px 24px"
               className='img-over'
