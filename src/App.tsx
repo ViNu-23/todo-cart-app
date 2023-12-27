@@ -113,10 +113,10 @@ function App() {
   const saveEdit = () => {
     // Find the index of the product to be edited
     const productIndex = products.findIndex(product => product.id === editingProduct.id);
-
+  
     // Create a copy of the products array to avoid directly mutating state
     const updatedProducts = [...products];
-
+  
     // Update the product in the copied array
     updatedProducts[productIndex] = {
       ...editingProduct,
@@ -125,14 +125,22 @@ function App() {
       price: parseFloat(productPrice) || editingProduct.price,
       link: productLink || editingProduct.link,
     };
-
+  
     // Update the state and local storage
     setProducts(updatedProducts);
     localStorage.setItem('products', JSON.stringify(updatedProducts));
-
-    // Close the modal
+  
+    // Close the modal and clear the edit state
     closeEditModal();
+  
+    // Clear input values after saving edits
+    setProductName('');
+    setProductBrand('');
+    setProductPrice('');
+    setProductLink('');
   };
+  
+  
 
   return (
     <>
@@ -180,7 +188,7 @@ function App() {
                 </InputGroup>
 
                 <InputGroup>
-                  <NumberInput min={1} w={'100%'} value={productPrice} onChange={(valueString) => setProductPrice(valueString)}>
+                  <NumberInput w={'100%'} value={productPrice} onChange={(valueString) => setProductPrice(valueString)}>
                     <NumberInputField
                       placeholder='Product Price'
                     />
@@ -282,7 +290,7 @@ function App() {
             </FormControl>
             <FormControl>
               <FormLabel>Product Price</FormLabel>
-              <NumberInput min={1} w={'100%'} value={productPrice || editingProduct?.price} onChange={(valueString) => setProductPrice(valueString)}>
+              <NumberInput w={'100%'} value={productPrice || editingProduct?.price} onChange={(valueString) => setProductPrice(valueString)}>
                 <NumberInputField
                   placeholder='Product Price'
                 />
