@@ -31,6 +31,7 @@ import {
     brand: string;
     price: number;
     link: string;
+    quantity?: number; 
   }
   
   export default function Product() {
@@ -52,75 +53,91 @@ import {
     };
   
     const buyProduct = (productId: string) => {
-      const quantity = quantityMap[productId] || 1;
-  
-      if (quantity <= 0) {
+        const quantity = quantityMap[productId] || 1;
+      
+        if (quantity <= 0) {
+          toast({
+            title: 'Quantity Error',
+            description: 'Please select a quantity greater than 0.',
+            status: 'error',
+            duration: 2000,
+            isClosable: true,
+          });
+          return;
+        }
+      
+        const productToBuy = products.find((product) => product.id === productId);
+      
+        if (!productToBuy) {
+          // Handle the case when productToBuy is undefined
+          toast({
+            title: 'Product Not Found',
+            description: 'The selected product does not exist.',
+            status: 'error',
+            duration: 2000,
+            isClosable: true,
+          });
+          return;
+        }
+      
+        const cartItems: Product[] = JSON.parse(localStorage.getItem('cartItems') || '[]');
+      
+        const existingCartItemIndex = cartItems.findIndex((item) => item.id === productId);
+      
+        if (existingCartItemIndex !== -1) {
+          // If the item exists, update the quantity
+          const existingCartItem = cartItems[existingCartItemIndex];
+          existingCartItem.quantity = (existingCartItem.quantity || 0) + quantity;
+        } else {
+          // If the item doesn't exist, add a new item with quantity
+          const boughtItem: Product = {
+            id: productToBuy.id,
+            name: productToBuy.name,
+            brand: productToBuy.brand,
+            price: productToBuy.price,
+            link: productToBuy.link,
+            quantity: quantity,
+          };
+          cartItems.push(boughtItem);
+        }
+      
+        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+      
         toast({
-          title: 'Quantity Error',
-          description: 'Please select a quantity greater than 0.',
-          status: 'error',
+          title: 'Product Added',
+          description: `${quantity} ${quantity > 1 ? 'items' : 'item'} added to the cart.`,
+          status: 'success',
           duration: 2000,
           isClosable: true,
         });
-        return;
-      }
-  
-      const productToBuy = products.find((product) => product.id === productId);
-      const cartItems: Product[] = JSON.parse(localStorage.getItem('cartItems') || '[]');
-  
-      const existingCartItem = cartItems.find((item) => item.id === productId);
-  
-      if (existingCartItem) {
-        existingCartItem.quantity += quantity;
-      } else {
-        const boughtItem: Product = {
-          id: productToBuy.id,
-          name: productToBuy.name,
-          brand: productToBuy.brand,
-          price: productToBuy.price,
-          link: productToBuy.link,
-        };
-        cartItems.push(boughtItem);
-      }
-  
-      localStorage.setItem('cartItems', JSON.stringify(cartItems));
-  
-      toast({
-        title: 'Product Added',
-        description: `${quantity} ${quantity > 1 ? 'items' : 'item'} added to the cart.`,
-        status: 'success',
-        duration: 2000,
-        isClosable: true,
-      });
-  
-      setQuantityMap((prevQuantityMap) => ({
-        ...prevQuantityMap,
-        [productId]: 1, // Reset the quantity for the current product to 1
-      }));
-    };
-  
-    const handleEditClick = (product: Product) => {
-      setEditingProduct(product);
-      setEditModalOpen(true);
-    };
-  
-    const handleEditSubmit = () => {
-      if (editingProduct) {
-        const index = products.findIndex((product) => product.id === editingProduct.id);
-  
-        if (index !== -1) {
-          const updatedProducts = [...products];
-          updatedProducts[index] = editingProduct;
-  
-          localStorage.setItem('products', JSON.stringify(updatedProducts));
-          setProducts(updatedProducts);
-  
-          setEditModalOpen(false);
-          setEditingProduct(null);
+      
+        setQuantityMap((prevQuantityMap) => ({
+          ...prevQuantityMap,
+          [productId]: 1, // Reset the quantity for the current product to 1
+        }));
+        
+      };
+      const handleEditClick = (product: Product) => {
+        setEditingProduct(product);
+        setEditModalOpen(true);
+      };
+    
+      const handleEditSubmit = () => {
+        if (editingProduct) {
+          const index = products.findIndex((product) => product.id === editingProduct.id);
+    
+          if (index !== -1) {
+            const updatedProducts = [...products];
+            updatedProducts[index] = editingProduct;
+    
+            localStorage.setItem('products', JSON.stringify(updatedProducts));
+            setProducts(updatedProducts);
+    
+            setEditModalOpen(false);
+            setEditingProduct(null);
+          }
         }
-      }
-    };
-  
+    }
     return (
       <>
         <NavBar />
@@ -170,7 +187,6 @@ import {
                     type='number'
                     id="quantity"
                     name="quantity"
-                    min="1"
                     value={quantityMap[product.id] || ''}
                     placeholder='Qty'
                     style={{ width: '40px', borderRadius: '8px', backgroundColor: 'RGBA(0, 0, 0, 0.10)' }}
@@ -213,33 +229,58 @@ import {
                 <Input
                   type="text"
                   value={editingProduct ? editingProduct.name : ''}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                  onChange={(e) =>
+                    setEditingProduct((prevProduct) => ({
+                      ...(prevProduct as Product), 
+                      name: e.target.value,
+                    }))
+                  }
                 />
               </FormControl>
+
+
               <FormControl mt={4}>
-                <FormLabel>Brand</FormLabel>
-                <Input
-                  type="text"
-                  value={editingProduct ? editingProduct.brand : ''}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, brand: e.target.value })}
-                />
-              </FormControl>
-              <FormControl mt={4}>
-                <FormLabel>Price</FormLabel>
-                <Input
-                  type="number"
-                  value={editingProduct ? editingProduct.price : ''}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, price: e.target.value })}
-                />
-              </FormControl>
-              <FormControl mt={4}>
-                <FormLabel>Link</FormLabel>
-                <Input
-                  type="text"
-                  value={editingProduct ? editingProduct.link : ''}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, link: e.target.value })}
-                />
-              </FormControl>
+  <FormLabel>Brand</FormLabel>
+  <Input
+    type="text"
+    value={editingProduct ? editingProduct.brand : ''}
+    onChange={(e) =>
+      setEditingProduct((prevEditingProduct) => ({
+        ...prevEditingProduct!,
+        brand: e.target.value,
+      }))
+    }
+  />
+</FormControl>
+<FormControl mt={4}>
+  <FormLabel>Price</FormLabel>
+  <Input
+    type="number"
+    value={editingProduct ? editingProduct.price.toString() : ''}
+    onChange={(e) =>
+      setEditingProduct((prevEditingProduct) => ({
+        ...prevEditingProduct!,
+        price: parseFloat(e.target.value) || 0,
+      }))
+    }
+  />
+</FormControl>
+<FormControl mt={4}>
+  <FormLabel>Link</FormLabel>
+  <Input
+    type="text"
+    value={editingProduct ? editingProduct.link : ''}
+    onChange={(e) =>
+      setEditingProduct((prevEditingProduct) => ({
+        ...prevEditingProduct!,
+        link: e.target.value,
+      }))
+    }
+  />
+</FormControl>
+
+
+
             </ModalBody>
             <ModalFooter>
               <Button colorScheme="blue" mr={3} onClick={handleEditSubmit}>
@@ -254,4 +295,3 @@ import {
       </>
     );
   }
-  
