@@ -21,15 +21,6 @@ import {
   Divider,
   CardFooter,
   ButtonGroup,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
-  FormControl,
-  FormLabel,
 } from '@chakra-ui/react';
 import { LinkIcon, EditIcon, StarIcon, DeleteIcon } from '@chakra-ui/icons';
 
@@ -47,8 +38,7 @@ function App() {
   const [productBrand, setProductBrand] = useState<string>('');
   const [productPrice, setProductPrice] = useState<string | null>(null);
   const [productLink, setProductLink] = useState<string>('');
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+
   const toast = useToast();
 
   useEffect(() => {
@@ -203,7 +193,7 @@ function App() {
                 <Button variant='solid' colorScheme='blue'>
                   Add To Cart
                 </Button>
-                <Button variant='ghost' colorScheme='gray' onClick={() => openEditModal(product.id)}>
+                <Button variant='ghost' colorScheme='gray' onClick={}>
                   Edit
                 </Button>
                 <Button variant='ghost' colorScheme='red' onClick={() => deleteProduct(product.id)}>
