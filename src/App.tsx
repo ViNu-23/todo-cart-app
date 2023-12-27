@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
 import {
-  ChakraProvider,
   Center,
   Box,
   Card as ChakraCard,
