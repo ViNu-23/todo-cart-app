@@ -69,7 +69,6 @@ import {
         const productToBuy = products.find((product) => product.id === productId);
       
         if (!productToBuy) {
-          // Handle the case when productToBuy is undefined
           toast({
             title: 'Product Not Found',
             description: 'The selected product does not exist.',
@@ -85,11 +84,9 @@ import {
         const existingCartItemIndex = cartItems.findIndex((item) => item.id === productId);
       
         if (existingCartItemIndex !== -1) {
-          // If the item exists, update the quantity
           const existingCartItem = cartItems[existingCartItemIndex];
           existingCartItem.quantity = (existingCartItem.quantity || 0) + quantity;
         } else {
-          // If the item doesn't exist, add a new item with quantity
           const boughtItem: Product = {
             id: productToBuy.id,
             name: productToBuy.name,
@@ -113,7 +110,7 @@ import {
       
         setQuantityMap((prevQuantityMap) => ({
           ...prevQuantityMap,
-          [productId]: 1, // Reset the quantity for the current product to 1
+          [productId]: 1, 
         }));
         
       };
